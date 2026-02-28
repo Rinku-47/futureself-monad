@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FutureSelf — Motivation Vault</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- Ethers.js -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.0/dist/ethers.umd.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin:0; padding:0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1e1b4b, #020617 60%);
+      color: #e5e7eb;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Blockchain Canvas Background */
+    #blockchain-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: url("https://www.transparenttextures.com/patterns/cubes.png");
+      opacity: 0.04;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* NAVIGATION */
+    nav {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      z-index: 3;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      background: rgba(2,6,23,0.6);
+      backdrop-filter: blur(14px);
+    }
+    nav .logo {
+      font-weight: 700;
+      font-size: 1.5rem;
+      background: linear-gradient(90deg, #38bdf8, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    nav .nav-buttons button {
+      margin-left: 15px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, #22d3ee, #a855f7);
+      box-shadow: 0 0 18px rgba(168,85,247,0.35);
+      color: #020617;
+      transition: all 0.3s ease;
+    }
+    nav .nav-buttons button:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 0 30px rgba(56,189,248,0.8);
+    }
+
+    /* CONTAINER */
+    .container { max-width: 1100px; margin: auto; position: relative; z-index:2; padding: 0 20px; }
+
+    /* HERO */
+    .hero { text-align: center; margin: 80px 0 50px; }
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(90deg,#38bdf8,#a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+    }
+    .hero p {
+      color: #94a3b8;
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin: 0 auto 25px auto;
+    }
+    .hero .cta-buttons button {
+      margin: 0 10px;
+      padding: 14px 26px;
+      font-weight: 600;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg,#22d3ee,#a855f7);
+      box-shadow: 0 0 18px rgba(168,85,247,0.35);
+      color:#020617;
+      transition: all 0.3s ease;
+    }
+    .hero .cta-buttons button:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 0 30px rgba(56,189,248,0.8);
+    }
+
+    /* FEATURES */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+      gap: 25px;
+      margin-bottom: 60px;
+    }
+    .feature-card {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(14px);
+      border-radius: 16px;
+      padding: 28px 20px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+    }
+    .feature-card img {
+      width: 50px; margin-bottom: 15px;
+    }
+    .feature-card h3 { margin-bottom:10px; font-weight:600; }
+    .feature-card p { font-size:0.95rem; color:#cbd5f5; }
+
+    /* WEB3 VAULT SECTION (Initially Hidden) */
+    .vault-section { margin-bottom: 80px; display:none; }
+
+    .box {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(14px);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .box:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    h3 { margin-top: 0; font-weight: 600; }
+
+    input, textarea {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      color: white;
+    }
+    textarea { min-height: 90px; resize: vertical; }
+
+    button {
+      margin-top: 14px;
+      padding: 14px 22px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      color: #020617;
+      background: linear-gradient(135deg, #22d3ee, #a855f7);
+      transition: all 0.3s ease;
+      box-shadow: 0 0 18px rgba(168, 85, 247, 0.35);
+    }
+    button:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 0 30px rgba(56, 189, 248, 0.8);
+    }
+
+    p { margin-top: 12px; font-size: 0.9rem; color: #cbd5f5; }
+
+    #finalMessage {
+      margin-top: 16px;
+      padding: 16px;
+      background: rgba(2, 6, 23, 0.8);
+      border-radius: 12px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #e0f2fe;
+    }
+
+    /* FOOTER */
+    footer {
+      text-align:center;
+      padding:30px 20px;
+      color:#94a3b8;
+      font-size:0.9rem;
+      border-top:1px solid rgba(255,255,255,0.12);
+    }
+
+    /* RESPONSIVE */
+    @media(max-width:600px) {
+      .hero h1 { font-size:2.3rem; }
+      nav { flex-direction: column; gap:10px; }
+      nav .nav-buttons { display:flex; flex-wrap:wrap; justify-content:center; }
+    }
+
+  </style>
+</head>
+
+<body>
+<canvas id="blockchain-bg"></canvas>
+
+<!-- NAVIGATION -->
+<nav>
+  <div class="logo">FutureSelf</div>
+  <div class="nav-buttons">
+    <button>Sign In</button>
+    <button>Sign Up</button>
+  </div>
+</nav>
+
+<div class="container">
+  <!-- HERO -->
+  <div class="hero">
+    <h1>🔐 FutureSelf</h1>
+    <p>Lock your goals today. Unlock your potential tomorrow.</p>
+    <div class="cta-buttons">
+      <button onclick="showVault()">Create Your Vault</button>
+      <button>Learn More</button>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="features">
+    <div class="feature-card">
+      <img src="security-svgrepo-com.svg" alt="Secure">
+      <h3>Secure Storage</h3>
+      <p>Your messages and goals are encrypted and stored on-chain safely.</p>
+    </div>
+    <div class="feature-card">
+      <img src="unlock-alt-svgrepo-com.svg" alt="Unlock">
+      <h3>Unlock on Goal</h3>
+      <p>Messages unlock only when your wallet or milestones grow.</p>
+    </div>
+    <div class="feature-card">
+      <img src="track-svgrepo-com.svg" alt="Track">
+      <h3>Track Progress</h3>
+      <p>Monitor your vaults and see your growth over time.</p>
+    </div>
+    <div class="feature-card">
+      <img src="wallet-svgrepo-com.svg" alt="Wallet">
+      <h3>Wallet Integration</h3>
+      <p>Connect your wallet for blockchain-backed security.</p>
+    </div>
+  </div>
+
+  <!-- WEB3 VAULT INTERFACE -->
+  <div class="vault-section" id="vault">
+    <div class="box">
+      <button onclick="connectWallet()">Connect Wallet</button>
+      <p id="wallet"></p>
+    </div>
+
+    <div class="box">
+      <h3>Create Vault</h3>
+      <input id="target" placeholder="Target Growth %" />
+      <textarea id="message" placeholder="Message to your future self"></textarea>
+      <button onclick="createVault()">Deploy Vault</button>
+      <p id="contractAddr"></p>
+    </div>
+
+    <div class="box">
+      <h3>Unlock Check</h3>
+      <button onclick="checkUnlock()">Check & Unlock</button>
+      <button onclick="readMessage()">Read Message</button>
+      <p id="finalMessage"></p>
+    </div>
+  </div>
+</div>
+
+<!-- BLOCKCHAIN ANIMATION -->
+<script>
+const canvas = document.getElementById("blockchain-bg");
+const ctx = canvas.getContext("2d");
+let nodes = [];
+const NODE_COUNT = 70, MAX_DISTANCE = 120;
+
+function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas();
+window.addEventListener("resize",resizeCanvas);
+
+class Node{
+  constructor(){ this.reset(); }
+  reset(){ 
+    this.x=Math.random()*canvas.width; 
+    this.y=Math.random()*canvas.height; 
+    this.radius=Math.random()*2+1; 
+    this.vx=(Math.random()-0.5)*0.3; 
+    this.vy=(Math.random()-0.5)*0.3; 
+    this.opacity=Math.random()*0.5+0.3; 
+  }
+  update(){ 
+    this.x+=this.vx; this.y+=this.vy; 
+    if(this.x<0||this.x>canvas.width||this.y<0||this.y>canvas.height){this.reset();}
+  }
+  draw(){
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
+    ctx.fillStyle=`rgba(56,189,248,${this.opacity})`;
+    ctx.shadowColor="#38bdf8";
+    ctx.shadowBlur=8;
+    ctx.fill();
+    ctx.shadowBlur=0;
+  }
+}
+for(let i=0;i<NODE_COUNT;i++){ nodes.push(new Node()); }
+
+function drawConnections(){
+  for(let i=0;i<nodes.length;i++){
+    for(let j=i+1;j<nodes.length;j++){
+      const dx=nodes[i].x-nodes[j].x;
+      const dy=nodes[i].y-nodes[j].y;
+      const distance=Math.sqrt(dx*dx+dy*dy);
+      if(distance<MAX_DISTANCE){
+        const opacity=1-distance/MAX_DISTANCE;
+        ctx.beginPath();
+        ctx.moveTo(nodes[i].x,nodes[i].y);
+        ctx.lineTo(nodes[j].x,nodes[j].y);
+        ctx.strokeStyle=`rgba(168,85,247,${opacity*0.4})`;
+        ctx.lineWidth=0.6;
+        ctx.stroke();
+      }
+    }
+  }
+}
+function animate(){ ctx.clearRect(0,0,canvas.width,canvas.height); nodes.forEach(node=>{node.update();node.draw();}); drawConnections(); requestAnimationFrame(animate); }
+animate();
+</script>
+
+<!-- WEB3 LOGIC -->
+<script>
+let provider, signer, contract;
+
+const ABI = ["function checkAndUnlock() public","function readMessage() public view returns (string)"];
+
+async function connectWallet(){ provider=new ethers.BrowserProvider(window.ethereum); await provider.send("eth_requestAccounts",[]); signer=await provider.getSigner(); document.getElementById("wallet").innerText="Connected: "+await signer.getAddress(); }
+async function createVault(){ const target=document.getElementById("target").value; const message=document.getElementById("message").value; const factory=new ethers.ContractFactory(["constructor(uint256,string)"],"PASTE_BYTECODE_HERE",signer); const vault=await factory.deploy(target,message); await vault.waitForDeployment(); contract=vault; document.getElementById("contractAddr").innerText="Vault Deployed: "+vault.target; }
+async function checkUnlock(){ await contract.checkAndUnlock(); alert("Checked!"); }
+async function readMessage(){ const msg=await contract.readMessage(); document.getElementById("finalMessage").innerText="🔥 Future You Says: "+msg+" — Keep going. Your discipline is paying off."; }
+
+// Show vault section
+function showVault(){
+  document.getElementById('vault').style.display='block';
+  document.getElementById('vault').scrollIntoView({behavior:'smooth'});
+}
+</script>
+
+<footer>
+  &copy; 2026 FutureSelf. All rights reserved. | <a href="#" style="color:#38bdf8;">Terms</a> | <a href="#" style="color:#38bdf8;">Contact</a>
+</footer>
+
+</body>
+</html>
